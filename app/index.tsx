@@ -10,7 +10,7 @@ import * as Clipboard from "expo-clipboard";
 export default function Index() {
   const insets = useSafeAreaInsets();
 
-  const [searchPhrase, setSearchPhrase] = useState("cute");
+  const [searchPhrase, setSearchPhrase] = useState("");
   const [clicked, setClicked] = useState(false);
 
   const copyToClipboard = async (text: string) => {
