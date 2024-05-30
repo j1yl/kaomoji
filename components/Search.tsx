@@ -7,6 +7,8 @@ import {
   CormorantGaramond_400Regular,
 } from "@expo-google-fonts/cormorant-garamond";
 import { DawningofaNewDay_400Regular } from "@expo-google-fonts/dawning-of-a-new-day";
+import { SearchTag } from "./SearchTag";
+import EmojiCard from "./EmojiCard";
 
 const emoticons = emoticonData as EmoticonData;
 
@@ -26,8 +28,6 @@ type EmoticonData = {
 };
 
 export function Search({
-  clicked,
-  setClicked,
   searchPhrase,
   setSearchPhrase,
   copyToClipboard,
@@ -88,20 +88,12 @@ export function Search({
       >
         kaomoji & more
       </Text>
-      <View
-        style={
-          clicked ? styles.searchBar__clicked : styles.searchBar__unclicked
-        }
-      >
+      <View style={styles.searchBar}>
         <TextInput
           style={styles.input}
-          placeholder="Search for tags"
+          placeholder="search for tags"
           value={searchPhrase}
           onChangeText={setSearchPhrase}
-          onFocus={() => {
-            setClicked(true);
-          }}
-          autoFocus
         />
         <Feather name="search" size={16} color="black" />
       </View>
@@ -115,99 +107,31 @@ export function Search({
           gap: 8,
         }}
       >
-        <View
-          onTouchEnd={() => {
-            setSearchPhrase("cute");
-            setClicked(false);
-          }}
-          style={styles.searchTag}
-        >
-          <Text style={styles.searchTagText}>cute</Text>
-        </View>
-        <View
-          onTouchEnd={() => {
-            setSearchPhrase("happy");
-            setClicked(false);
-          }}
-          style={styles.searchTag}
-        >
-          <Text style={styles.searchTagText}>happy</Text>
-        </View>
-        <View
-          onTouchEnd={() => {
-            setSearchPhrase("sad");
-            setClicked(false);
-          }}
-          style={styles.searchTag}
-        >
-          <Text style={styles.searchTagText}>sad</Text>
-        </View>
-        <View
-          onTouchEnd={() => {
-            setSearchPhrase("star");
-            setClicked(false);
-          }}
-          style={styles.searchTag}
-        >
-          <Text style={styles.searchTagText}>star</Text>
-        </View>
-        <View
-          onTouchEnd={() => {
-            setSearchPhrase("wink");
-            setClicked(false);
-          }}
-          style={styles.searchTag}
-        >
-          <Text style={styles.searchTagText}>wink</Text>
-        </View>
-        <View
-          onTouchEnd={() => {
-            setSearchPhrase("cat");
-            setClicked(false);
-          }}
-          style={styles.searchTag}
-        >
-          <Text style={styles.searchTagText}>cat</Text>
-        </View>
-        <View
-          onTouchEnd={() => {
-            setSearchPhrase("bear");
-            setClicked(false);
-          }}
-          style={styles.searchTag}
-        >
-          <Text style={styles.searchTagText}>bear</Text>
-        </View>
+        <SearchTag searchPhrase={"cute"} setSearchPhrase={setSearchPhrase} />
+        <SearchTag searchPhrase={"happy"} setSearchPhrase={setSearchPhrase} />
+        <SearchTag searchPhrase={"sad"} setSearchPhrase={setSearchPhrase} />
+        <SearchTag searchPhrase={"star"} setSearchPhrase={setSearchPhrase} />
+        <SearchTag searchPhrase={"wink"} setSearchPhrase={setSearchPhrase} />
+        <SearchTag searchPhrase={"cat"} setSearchPhrase={setSearchPhrase} />
+        <SearchTag searchPhrase={"bear"} setSearchPhrase={setSearchPhrase} />
       </View>
       <View style={styles.resultsContainer}>
         <FlatList
           data={filteredEmoticons}
           keyExtractor={(item) => item}
-          renderItem={({ item }) => (
-            <View
-              style={styles.emoticonContainer}
-              onTouchStart={() => {
-                copyToClipboard(item);
-              }}
-            >
-              <Text style={styles.emoticonText}>{item}</Text>
-              <View style={styles.tagContainer}>
-                {emoticons[item].new_tags.map((tag: string) => (
-                  <Text key={tag} style={styles.tag}>
-                    {tag.toLowerCase()}
-                  </Text>
-                ))}
-                {emoticons[item].original_tags.length > 0 && (
-                  <Text
-                    key={emoticons[item].original_tags[0]}
-                    style={styles.tag}
-                  >
-                    {emoticons[item].original_tags[0].toLowerCase()}
-                  </Text>
-                )}
-              </View>
-            </View>
-          )}
+          renderItem={({ item }) => {
+            const tags = emoticons[item].new_tags.concat(
+              emoticons[item].original_tags
+            );
+            return (
+              <EmojiCard
+                key={item}
+                item={item}
+                tags={tags}
+                copyToClipboard={copyToClipboard}
+              />
+            );
+          }}
         />
       </View>
     </View>
@@ -222,27 +146,18 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
 
-  searchBar__unclicked: {
+  searchBar: {
     padding: 8,
     flexDirection: "row",
     width: "100%",
-    backgroundColor: "#d9dbda",
-    borderRadius: 8,
-    alignItems: "center",
-  },
-
-  searchBar__clicked: {
-    padding: 8,
-    flexDirection: "row",
-    width: "100%",
-    backgroundColor: "#d9dbda",
+    backgroundColor: "hsl(0, 0%, 90%)",
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "space-evenly",
   },
 
   input: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: "CormorantGaramond_400Regular",
     width: "90%",
   },
@@ -253,52 +168,5 @@ const styles = StyleSheet.create({
     width: "100%",
     maxHeight: "100%",
     overflow: "scroll",
-  },
-
-  emoticonContainer: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-    marginVertical: 8,
-    backgroundColor: "hsl(0, 0%, 90%)",
-    borderRadius: 8,
-  },
-
-  emoticonText: {
-    fontSize: 24,
-    textAlign: "center",
-  },
-
-  tagContainer: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 8,
-    flexWrap: "wrap",
-  },
-
-  tag: {
-    fontSize: 14,
-    fontFamily: "CormorantGaramond_400Regular",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: "hsl(0, 0%, 85%)",
-    overflow: "hidden",
-    borderRadius: 8,
-  },
-
-  searchTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: "hsl(0, 0%, 85%)",
-    overflow: "hidden",
-    borderRadius: 8,
-  },
-
-  searchTagText: {
-    fontSize: 14,
-    fontFamily: "CormorantGaramond_400Regular",
   },
 });
